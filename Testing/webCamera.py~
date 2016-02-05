@@ -19,7 +19,7 @@ yTarget = 200
 
 
 port = 5801
-host = 'roboRIO-4499-FRC.local'
+host = 'localhost'
 
 cap = cv2.VideoCapture(0)
 cap.set(3,640)
@@ -29,9 +29,20 @@ cap_two = cv2.VideoCapture(1)
 cap_two.set(3,640)
 cap_two.set(4,480)
 
-errorFrameOne = open('/home/ubuntu/VideoStream/templates/PolarBearError.jpg','rb').read()
 
 app = Flask(__name__)
+
+class Camera(object):
+    """An emulated camera implementation that streams a repeated sequence of
+    files 1.jpg, 2.jpg and 3.jpg at a rate of one frame per second."""
+
+    def __init__(self):
+	print "Init Camera"
+        self.frames = [open(f + '.jpg', 'rb').read() for f in ['1', '2', '3']]
+
+    def get_frame(self):
+	print "requested Frame"
+        return self.frames[int(time()) % 3]
 
 
 @app.route('/')
@@ -109,70 +120,33 @@ def vision(cap):
 
 def gen(camera, value):
     """Video streaming generator function."""
-    count = 0
-    lastTime = 0
-    
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.settimeout(2)
-     
-    # connect to remote host
-    try :
-        soc.connect((host, port))
-	print 'found target'
-	soc.send("#Found you\n")
-    except :
-        print 'Unable to connect'
-        sys.exit()
-
-
     while 1:
-	#frame = camera.get_frame()
-	millis = int(round(time.time()*1000))
+	print("Made it to loop")
 	if(value == 0):
 		msg, CVframe = vision(cap)
-		try:
-			soc.send(msg)
-		except :
-       			print 'Lost Connection with Roborio'
-			soc.connect((host, port))
-			print('found target')
-			soc.send("#Found you\n")
-			
-		#cv2.imwrite("frame%d.jpg" % count, CVframe)
-		#frame = open("frame%d.jpg" % count,'rb').read()
 		frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 	
 	else:
 	
 		ret, CVframe = cap_two.read()
-		if(ret == True):
-			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
-		else:
-			frame = errorFrameOne
-		
-	#print(millis-lastTime)
-
+		frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 	yield (b'--frame\r\n'
 	       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-	#os.remove("frame%d.jpg" % count)	
-	count = count + 1
-#	break
 	if cv2.waitKey(1) & 0xFF == ord('q'):
-		#os.remove("/home/void/Documents/frames/frame%d.jpg" % count)
-		
+
         	break
-	lastTime = int(round(time.time()*1000))
 
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(0),
+    print("Vid one Called")
+    return Response(gen(Camera(),0),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_feed_two')
 def video_feed_two():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(1),
+    return Response(gen(Camera(),1),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
