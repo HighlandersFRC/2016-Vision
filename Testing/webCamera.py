@@ -19,7 +19,7 @@ yTarget = 200
 
 
 port = 5801
-host = 'roboRIO-4499-FRC.local'
+host = 'localhost'
 
 cap = cv2.VideoCapture(0)
 cap.set(3,640)
@@ -50,8 +50,8 @@ v_max = 255
 save_name = ""
 save_now = 0
 
-pandaBearError = open("/home/ubuntu/2016-Vision/VideoStream/templates/PandaBearError.jpg",'rb').read()
-polarBearError = open("/home/ubuntu/2016-Vision/VideoStream/templates/PolarBearError.jpg",'rb').read()
+pandaBearError = open("/home/void/Documents/2016-Vision/VideoStream/templates/PandaBearError.jpg",'rb').read()
+polarBearError = open("/home/void/Documents/2016-Vision/VideoStream/templates/PolarBearError.jpg",'rb').read()
 
 @app.route('/')
 def index():
@@ -206,7 +206,7 @@ def video_feed_mask():
 def load_settings():
 	toReturn = "["
 	print("Load_Settings Called")
-	os.chdir("/home/ubuntu/2016-Vision/VideoStream/Presets")
+	os.chdir("/home/void/Documents/2016-Vision/VideoStream/Presets")
 	for file in glob.glob("*.txt"):
 		f = open(file,"r")
 		toReturn = toReturn + f.read() + ', '
@@ -232,7 +232,8 @@ def updateValues():
     save_name = request.args.get('save_name', 0, type=str)
     save_now = request.args.get('save_now', 0, type=int)
     if(save_now == 1):
-		f = open("/home/ubuntu/2016-Vision/VideoStream/Presets/" + save_name + ".txt", 'w')
+		#os.remove("/home/void/Documents/2016-Vision/VideoStream/Presets/" + save_name + ".txt")
+		f = open("/home/void/Documents/2016-Vision/VideoStream/Presets/" + save_name + ".txt", 'w')
 		f.write('{\"name\": \"' + save_name 
 		+ '\", \"h_min\":' + str(h_min) 
 		+ ',\"h_max\":' + str(h_max)
