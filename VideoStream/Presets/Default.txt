@@ -1,1 +1,1 @@
-{"name": "Default", "h_min":30,"h_max":89,"s_min":46,"s_max":125,"v_min":108,"v_max":255}
+{"name": "Default", "h_div":16,"s_div":19,"v_div":19,"xTarget":320,"yTarget":240}

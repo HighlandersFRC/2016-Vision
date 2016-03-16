@@ -1,15 +1,67 @@
 <!doctype html>
-<html>
+<html lang ="en">
   <head>
     <title>FRC 4499 Tegra Video Feed</title>
+    <link rel="shortcut icon" href="">
   </head>
   <body>
-    <h1 id='video_name' HEADER STYLE="position:absolute; TOP:32px; LEFT:64px;"> Foward View</h1>
-    <img id='video' IMG STYLE="position:absolute; TOP:96px; LEFT:64px;" src="{{ url_for('video_feed') }}" >
+    <h1 id='video_name' HEADER STYLE="position:absolute; TOP:32px; LEFT:256px;"> Foward View</h1>
+    <h1 id='video_two_name' HEADER STYLE="position:absolute; TOP:32px; LEFT:928px;"> Reverse View</h1>
+    <h1 id='video_three_name' HEADER STYLE="position:absolute; TOP:608px; LEFT:256px;"> Target View</h1>
+ 
+    <h5 id='h_div_ID' HEADER STYLE="position:absolute; TOP:64px; LEFT:64px;"> h_div </h5>
+    <h5 id='s_div_ID' HEADER STYLE="position:absolute; TOP:108px; LEFT:64px;"> s_div </h5>
+    <h5 id='v_div_ID' HEADER STYLE="position:absolute; TOP:152px; LEFT:64px;"> v_div </h5>
+    <h5 id='xTarget_ID' HEADER STYLE="position:absolute; TOP:196px; LEFT:64px;"> xTarget </h5>
+    <h5 id='yTarget_ID' HEADER STYLE="position:absolute; TOP:240px; LEFT:64px;"> yTarget </h5>
+    <img id='video' IMG STYLE="position:absolute; TOP:96px; LEFT:256px;" src="{{ url_for('video_feed') }}" >
+    <img id='videoTwo' IMG STYLE="position:absolute; TOP:96px; LEFT:928px;" src="{{ url_for('video_feed_two') }}" >
+    <img id='videothree' IMG STYLE="position:absolute; TOP:608px; LEFT:256px;" src="{{ url_for('video_feed_three') }}" >
+ 
     <button type="button" onclick="switchImage()">Toggle</button>
+    <button type="button" onclick="calibrationFeed()">Mask</button>
+    <button type="button" onclick="resetValues()">Reset</button>
+    <input type = "hidden" value = "0" id = "hidden_save" name = "save_now">
+    <select id = "choose_config">
+	
+    </select>
+    <h3>Calibration Ranges</h3>
+    <input type="range" id="h_div_bar"  min = "0" max="40" step="1" value="0" size="10" name="h_div" onchange="showValue('h_div_ID', this.value)"> h_div <br /><br />
+    <input type="range" id="s_div_bar" min = "0" max="40" step="1" value="0" size="10" name="s_div" onchange="showValue('s_div_ID', this.value)"> s_div <br /><br />
+    <input type="range" id="v_div_bar" min = "0" max="40" step="1" value="0" size="10" name="v_div" onchange="showValue('v_div_ID', this.value)"> v_div <br /><br />
+    <input type="range" id="xTarget_bar" min = "0" max="640" step="1" value="0" size="10" name="xTarget" onchange="showValue('xTarget_ID', this.value)"> xTarget <br /><br />
+    <input type="range" id="yTarget_bar" min = "0" max="480" step="1" value="0" size="10" name="yTarget" onchange="showValue('yTarget_ID', this.value)"> yTarget <br /><br />
+    <span id="result">?</span>
+    <script src= "/js/jquery.min.js"></script>
+    <script type=text/javascript>
+	var update = function(){
+	    $(function() {
+		$.getJSON('/updateValues', {
+		  h_div: $('input[name="h_div"]').val(),
+		  s_div: $('input[name="s_div"]').val(),
+		  v_div: $('input[name="v_div"]').val(),
+		  xTarget: $('input[name="xTarget"]').val(),
+		  yTarget: $('input[name="yTarget"]').val(),
+		  save_name: $('input[name="save_name"]').val(),
+		  save_now: $('input[name="save_now"]').val()
+		}, function(data) {
+		  $("#result").text(data.result);
+		});
+		return false;
+	    });
+	}
+  </script>
+    <script type="text/javascript">
+	function showValue(name, newValue)
+	{
+		document.getElementById(name).innerHTML=newValue;
+		update()
+	}
+    </script>
   </body>
   <script type="text/javascript">
 	var value = 0;
+	var allPresets;
 	var switchImage = function() {
 		if(value==1){
 			document.getElementById("video").src="{{ url_for('video_feed') }}";
@@ -18,9 +70,105 @@
 		}
 		else{
 			document.getElementById("video").src="{{ url_for('video_feed_two') }}";
+
 			document.getElementById("video_name").innerHTML = "Reverse View";
 			value = 1;
 		}
 	}
+	var calibrationFeed = function(){
+		if(value==2){
+			document.getElementById("video").src="{{ url_for('video_feed') }}";
+			document.getElementById("video_name").innerHTML = "Forward View";
+			value =0;
+		}
+		else{
+			document.getElementById("video").src="{{ url_for('video_feed_mask') }}";
+			document.getElementById("video_name").innerHTML = "Mask View";
+			value = 2;
+		}
+
+	}
+	var loadValues = function(object){
+		document.getElementById("h_div_bar").value= object.h_div
+		document.getElementById("s_div_bar").value= object.s_div
+		document.getElementById("v_div_bar").value= object.v_div
+		document.getElementById("xTarget_bar").value= object.xTarget
+		document.getElementById("yTarget_bar").value= object.yTarget
+		
+		document.getElementById("h_div_ID").innerHTML = object.h_div
+		document.getElementById("s_div_ID").innerHTML = object.s_div
+		document.getElementById("v_div_ID").innerHTML = object.v_div
+		document.getElementById("xTarget_ID").innerHTML = object.xTarget
+		document.getElementById("yTarget_ID").innerHTML = object.yTarget
+		update();
+	}
+
+
+	$(document).ready( function(){
+		$("#choose_config").change(function(event){
+			console.log(event);
+			loadValues(allPresets[$(this).val()]);
+			update();
+		});
+		$.ajax({
+			url: "/load_settings",
+			dataType: "json",
+			success: function(data){
+				console.log("Got Data", data);
+				allPresets = data;
+				var options = $("#choose_config");
+				data.forEach(function(item,idx){
+					options.append($("<option/>").val(idx).text(item.name));
+				})
+				
+			}
+		});
+	});
+	var resetValues = function() {
+		var configIndex = document.getElementById("choose_config").value
+		loadValues(allPresets[configIndex])
+		update()
+	}
+  </script>
+  <input type="file" id="files" name="files[]" multiple />
+  <output id="list"></output><br /><br />
+  <input type="text" name = "save_name" id="save_names_id"> 
+  <button type="button" onclick="saveSettings()">Save</button>
+  <script>
+	var saveSettings = function(){
+	document.getElementById("hidden_save").value = "1";
+	update();
+	document.getElementById("hidden_save").value = "0";
+	update();
+	alert(document.getElementById("save_names_id").value + "saved");
+	
+	}
+
+  </script>
+  <script>
+  function handleFileSelect(evt) {
+	    var files = evt.target.files; // FileList object
+	    var text = "void";
+	    // files is a FileList of File objects. List some properties.
+	    var output = [];
+	    for (var i = 0, f; f = files[i]; i++) {
+	      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+		          f.size, ' bytes, last modified: ',
+		          f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+		          '</li>');
+			var reader = new FileReader();
+			reader.onload = function(e) {
+			text = reader.result;
+			//alert(text);
+			var obj = JSON.parse(text);
+			loadValues(obj);
+			}
+	    		reader.readAsText(f);
+
+	    	}
+	    	document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+	  	}
+	document.getElementById('files').addEventListener('change', handleFileSelect, false);
+	update() 
   </script>
 </html>

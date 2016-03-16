@@ -19,7 +19,7 @@ yTarget = 200
 
 
 port = 5801
-host = 'roboRIO-4499-FRC.local'
+host = '10.44.99.2'
 
 cap = cv2.VideoCapture(0)
 cap.set(3,640)
@@ -61,8 +61,8 @@ def index():
 
 def vision(cap):
 	ret, frame = cap.read()
-	if(ret == False):
-		return "#Error Proccessing Vision",pandaBearError, pandaBearError
+#	if(ret == False):
+	#	return "#Error Proccessing Vision",pandaBearError, pandaBearError
 	global h_min
 	global h_min
 	global s_min
@@ -135,46 +135,46 @@ def vision(cap):
 
 def gen(value):
     """Video streaming generator function."""
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.settimeout(2)
+#    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ #   soc.settimeout(2)
      
     # connect to remote host
-    try :
-        soc.connect((host, port))
-	print 'found target'
-	soc.send("#Found you\n")
-    except :
-        print 'Unable to connect'
-        sys.exit()
+  #  try :
+   #     soc.connect((host, port))
+#	print 'found target'
+#	soc.send("#Found you\n")
+ #   except :
+  #      print 'Unable to connect'
+   #     sys.exit()
 
     while 1:
 		if(value == 0):
 			msg, CVframe, maskFrame = vision(cap)
-			try:
-				soc.send(msg)
-			except :
-	   			print 'Lost Connection with Roborio'
-				soc.connect((host, port))
-				print('found target')
-				soc.send("#Found you\n")
+			#try:
+			#	soc.send(msg)
+			#except :
+	   		#	print 'Lost Connection with Roborio'
+			#	soc.connect((host, port))
+			#	print('found target')
+			#	soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		elif(value == 2):
 			msg, CVframe, maskFrame = vision(cap)
 
-			try:
-				soc.send(msg)
-			except :
-	   			print 'Lost Connection with Roborio'
-				soc.connect((host, port))
-				print('found target')
-				soc.send("#Found you\n")
+			#try:
+			#	soc.send(msg)
+			#except :
+	   		#	print 'Lost Connection with Roborio'
+			#	soc.connect((host, port))
+			#	print('found target')
+			#	soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',maskFrame,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		else:
 			ret, CVframe = cap_two.read()
-			if(ret == False):
-				frame = polarBearError
-			else:
-				frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
+			#if(ret == False):
+			#	frame = polarBearError
+			#else:
+			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		yield (b'--frame\r\n'
 	       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 		if cv2.waitKey(1) & 0xFF == ord('q'):

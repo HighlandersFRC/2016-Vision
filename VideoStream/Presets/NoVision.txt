@@ -1,1 +1,1 @@
-{"name": "NoVision", "h_min":255,"h_max":0,"s_min":255,"s_max":0,"v_min":255,"v_max":0}
+{"name": "NoVision", "h_div":0,"s_div":0,"v_div":0,"xTarget":0,"yTarget":0}
