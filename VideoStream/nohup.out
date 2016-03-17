@@ -116,3 +116,66 @@ Traceback (most recent call last):
   File "/usr/lib/python2.7/socket.py", line 303, in flush
     self._sock.sendall(view[write_offset:write_offset+buffer_size])
 error: [Errno 32] Broken pipe
+ * Running on http://0.0.0.0:5800/
+10.44.99.198 - - [01/Jan/2000 07:40:28] "GET / HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:28] "GET /js/jquery.min.js HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:28] "GET /video_feed_two HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:28] "GET /video_feed HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:29] "GET /video_feed_three HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:29] "GET /load_settings HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:30] "GET / HTTP/1.1" 200 -
+10.44.99.198 - - [01/Jan/2000 07:40:30] "GET /updateValues?h_min=0&h_max=0&s_min=0&s_max=0&v_min=0&v_max=0&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:34] "GET /updateValues?h_min=70&h_max=126&s_min=90&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:35] "GET /updateValues?h_min=70&h_max=126&s_min=90&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:36] "GET /video_feed_mask HTTP/1.1" 200 -
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/SocketServer.py", line 593, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python2.7/SocketServer.py", line 334, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python2.7/SocketServer.py", line 651, in __init__
+    self.finish()
+  File "/usr/lib/python2.7/SocketServer.py", line 710, in finish
+    self.wfile.close()
+  File "/usr/lib/python2.7/socket.py", line 279, in close
+    self.flush()
+  File "/usr/lib/python2.7/socket.py", line 303, in flush
+    self._sock.sendall(view[write_offset:write_offset+buffer_size])
+error: [Errno 32] Broken pipe
+10.44.99.198 - - [01/Jan/2000 07:40:39] "GET /video_feed_mask HTTP/1.1" 200 -
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/SocketServer.py", line 593, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python2.7/SocketServer.py", line 334, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python2.7/SocketServer.py", line 651, in __init__
+    self.finish()
+  File "/usr/lib/python2.7/SocketServer.py", line 710, in finish
+    self.wfile.close()
+  File "/usr/lib/python2.7/socket.py", line 279, in close
+    self.flush()
+  File "/usr/lib/python2.7/socket.py", line 303, in flush
+    self._sock.sendall(view[write_offset:write_offset+buffer_size])
+error: [Errno 32] Broken pipe
+10.44.99.198 - - [01/Jan/2000 07:40:42] "GET /updateValues?h_min=70&h_max=103&s_min=90&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:45] "GET /updateValues?h_min=70&h_max=103&s_min=53&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:47] "GET /updateValues?h_min=70&h_max=103&s_min=53&s_max=228&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:49] "GET /updateValues?h_min=70&h_max=103&s_min=53&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:52] "GET /updateValues?h_min=70&h_max=103&s_min=113&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:40:54] "GET /updateValues?h_min=70&h_max=103&s_min=152&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:05] "GET /updateValues?h_min=90&h_max=103&s_min=152&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:10] "GET /updateValues?h_min=90&h_max=116&s_min=152&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:11] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:17] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=55&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:18] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=81&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:23] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=68&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:23] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=40&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:24] "GET /updateValues?h_min=90&h_max=142&s_min=152&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:38] "GET /updateValues?h_min=90&h_max=142&s_min=103&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:40] "GET /updateValues?h_min=90&h_max=142&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:41] "GET /updateValues?h_min=90&h_max=255&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:42] "GET /updateValues?h_min=0&h_max=255&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:55] "GET /updateValues?h_min=81&h_max=255&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:57] "GET /updateValues?h_min=81&h_max=152&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+10.44.99.198 - - [01/Jan/2000 07:41:58] "GET /updateValues?h_min=81&h_max=135&s_min=0&s_max=255&v_min=0&v_max=255&save_name=&save_now=0 HTTP/1.1" 500 -
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

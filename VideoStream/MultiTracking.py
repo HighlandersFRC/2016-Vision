@@ -60,36 +60,37 @@ polarBearError = open("/home/ubuntu/2016-Vision/VideoStream/templates/PolarBearE
 @app.route('/')
 def index():
     """Video streaming home page."""
-    return render_template('index.html')
+    return render_template('indexTwo.html')
 
 
 def vision(cap):
 	ret, frame = cap.read()
+#	if(ret == False):
+	#	return "#Error Proccessing Vision",pandaBearError, pandaBearError
+	global h_min
+	global h_min
+	global s_min
+	global s_max
+	global v_min
+	global v_max
 	# show the original frame (Testing only)	
 	#cv2.imshow('Original',frame)
 
-	#Convert to HSV
+	#do conversions for the mask
 	hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-	h, s, v = cv2.split(hsv)
-	
-	hue = cv2.absdiff(h,90)
-	hue = cv2.subtract(90,hue)	
-	hue = cv2.divide(hue,thrs2)
-	saturation = cv2.divide(s, thrs3)
-	value = cv2.divide(v,thrs1)
+	lower_green = np.array([h_min, s_min, v_min]) 
+	upper_green = np.array([h_max, s_max, v_max])
 
-	targetyness = cv2.multiply(hue,saturation)
-	targetyness = cv2.multiply(targetyness, value)
+	# Threshold the HSV image to get only green colors
+	mask = cv2.inRange(hsv, lower_green, upper_green)
 
-	ret, targetyness = cv2.threshold(targetyness, 200,255,0) 
-	mask = targetyness
-	
 	#Show the mask (Testing Only)
 	#cv2.imshow('mask',mask)
 
 
-	#Find the contours of the combined image
-	discardImage, contours, hierarchy = cv2.findContours(targetyness,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	#Find the contours of the masked image
+	ret,thresh = cv2.threshold(mask,200,255,0)
+	discardImage, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 
 	#Make sure that a contour region is found
@@ -97,13 +98,33 @@ def vision(cap):
 		#find Biggest Contour region
 		areas = [cv2.contourArea(c) for c in contours]
 		max_index = np.argmax(areas)
-		cnt=contours[max_index]
-	
+		areaArray = []
+		for i, c in enumerate(contours):
+			area = cv2.contourArea(c)		
+			areaArray.append(area)
+		#cnt=contours[max_index]
+		sorteddata = sorted(zip(areaArray,contours),key=lambda x: x[0], reverse = True)
+		nearAnglePos = 0
+		nearAngle = 180
+		for i in range(0,2):
+			cnt=sorteddata[i][1]
+
 		#Find the smallest bounding box of the rectangle
-		rect = cv2.minAreaRect(cnt)
-		box = cv2.boxPoints(rect)
-		box = np.int0(box)
-		
+			rect = cv2.minAreaRect(cnt)
+			box = cv2.boxPoints(rect)
+			box = np.int0(box)
+			xCenter = (box[0][0] + box[1][0] + box[2][0] + box[3][0]) / 4
+			yCenter = (box[0][1] + box[1][1] + box[2][1] + box[3][1]) / 4
+			angle =-math.degrees(math.atan2((box[1][1] - box[0][1]),(box[1][0] - box[0][0])))-90
+			if(angle < nearAngle):
+				nearAngle = angle
+				nearAngelPos = i
+			#cv2.circle(frame,(box[1][0],box[1][1]),10,(255,0,0),-1)		
+			#cv2.circle(frame,(box[0][0],box[0][1]),10,(0,0,255),-1)
+			#font = cv2.FONT_HERSHEY_SIMPLEX
+			#cv2.putText(frame, str(angle),(xCenter,yCenter),font,1,(0,255,0),2,cv2.LINE_AA)
+		#	cv2.drawContours(frame,[box],0,(0,255,0),2)
+		cnt = sorteddata[nearAnglePos][1]
 		#find center of target for RoboRIO
 		xCenter = (box[0][0] + box[1][0] + box[2][0] + box[3][0]) / 4
 		yCenter = (box[0][1] + box[1][1] + box[2][1] + box[3][1]) / 4
@@ -140,28 +161,28 @@ def vision(cap):
 
 def gen(value):
 	"""Video streaming generator function."""
-#	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#	soc.settimeout(2)
+	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	soc.settimeout(2)
      
     # connect to remote host
-#	try:
-#		soc.connect((host, port))
-#		print 'found target'
-#		soc.send('#Found you\n')
+	try:
+		soc.connect((host, port))
+		print 'found target'
+		soc.send('#Found you\n')
 	
-#	except:
-#		print("unable to connect")
-#		sys.exit()
+	except:
+		print("unable to connect")
+		sys.exit()
         while 1:
 		if(value == 0):
 			msg, CVframe, maskFrame = vision(cap)
-#			try:
-#				soc.send(msg)
-#			except:
-#	   			print 'Lost Connection with Roborio'
-#				soc.connect((host, port))
-#				print('found target')
-#				soc.send("#Found you\n")
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		elif(value == 1):
 			ret, CVframe = cap_two.read()
@@ -169,12 +190,23 @@ def gen(value):
 			#	frame = polarBearError
 			#else:
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
-		else:
+		elif(value ==2):
 			ret, CVframe = cap_three.read()
 			#if(ret == False):
 			#	frame = polarBearError
 			#else:
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
+		else:
+			msg, CVframe, maskFrame = vision(cap)
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
+			frame = cv2.imencode('.jpg',maskFrame,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
+	
 		yield (b'--frame\r\n'
 	       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 		if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -205,7 +237,7 @@ def video_feed_three():
 @app.route('/video_feed_mask')
 def video_feed_mask():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(2),
+    return Response(gen(3),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/load_settings')
