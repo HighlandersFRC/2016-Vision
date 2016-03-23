@@ -24,7 +24,7 @@
     <button type="button" onclick="resetValues()">Reset</button>
     <input type = "hidden" value = "0" id = "hidden_save" name = "save_now">
     <select id = "choose_config">
-    
+
     </select>
     <h3>Calibration Ranges</h3>
     <input type="range" id="h_min_bar"  min = "0" max="255" step="1" value="0" size="10" name="h_min" onchange="showValue('h_min_ID', this.value)"> h_min <br /><br />
@@ -77,7 +77,7 @@
 			value = 1;
 		}
 	}
-	
+
 	var calibrationFeed = function(){
 		if(value==2){
 			document.getElementById("video").src="{{ url_for('video_feed') }}";
