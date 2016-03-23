@@ -76,11 +76,11 @@ def vision(cap):
 	hue = cv2.absdiff(h,90)
 	hue = cv2.subtract(90,hue)	
 	hue = cv2.divide(hue,h_div)
-	saturation = cv2.divide(s, s_div)
+#	saturation = cv2.divide(s, s_div)
 	value = cv2.divide(v,v_div)
 
-	targetyness = cv2.multiply(hue,saturation)
-	targetyness = cv2.multiply(targetyness, value)
+	#targetyness = cv2.multiply(hue,saturation)
+	targetyness = cv2.multiply(hue,value)
 
 	ret, targetyness = cv2.threshold(targetyness, 200,255,0) 
 	mask = targetyness
@@ -141,28 +141,28 @@ def vision(cap):
 
 def gen(value):
 	"""Video streaming generator function."""
-#	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#	soc.settimeout(2)
+	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	soc.settimeout(2)
      
     # connect to remote host
-#	try:
-#		soc.connect((host, port))
-#		print 'found target'
-#		soc.send('#Found you\n')
+	try:
+		soc.connect((host, port))
+		print 'found target'
+		soc.send('#Found you\n')
 	
-#	except:
-#		print("unable to connect")
-#		sys.exit()
+	except:
+		print("unable to connect")
+		sys.exit()
         while 1:
 		if(value == 0):
 			msg, CVframe, maskFrame = vision(cap)
-#			try:
-#				soc.send(msg)
-#			except:
-#	   			print 'Lost Connection with Roborio'
-#				soc.connect((host, port))
-#				print('found target')
-#				soc.send("#Found you\n")
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		elif(value == 1):
 			ret, CVframe = cap_two.read()
@@ -178,13 +178,13 @@ def gen(value):
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		else:
 			msg, CVframe, maskFrame = vision(cap)
-#			try:
-#				soc.send(msg)
-#			except:
-#	   			print 'Lost Connection with Roborio'
-#				soc.connect((host, port))
-#				print('found target')
-#				soc.send("#Found you\n")
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',maskFrame,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()	
 		yield (b'--frame\r\n'
 	       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')

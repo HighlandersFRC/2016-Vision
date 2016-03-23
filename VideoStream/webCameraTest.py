@@ -15,7 +15,7 @@ from flask import request
 xError = 24
 yError = 24
 xTarget = 320
-yTarget = 200 
+yTarget = 220 
 
 
 port = 5801
@@ -34,7 +34,7 @@ cap_three = cv2.VideoCapture(2)
 cap_three.set(3,640)
 cap_three.set(4,480)
 
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__)
 
 global h_min
 global h_max
@@ -60,7 +60,7 @@ polarBearError = open("/home/ubuntu/2016-Vision/VideoStream/templates/PolarBearE
 @app.route('/')
 def index():
     """Video streaming home page."""
-    return render_template('index.html')
+    return render_template('indexTwo.html')
 
 
 def vision(cap):
@@ -141,28 +141,28 @@ def vision(cap):
 
 def gen(value):
 	"""Video streaming generator function."""
-#	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#	soc.settimeout(2)
+	soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	soc.settimeout(2)
      
     # connect to remote host
-#	try:
-#		soc.connect((host, port))
-#		print 'found target'
-#		soc.send('#Found you\n')
+	try:
+		soc.connect((host, port))
+		print 'found target'
+		soc.send('#Found you\n')
 	
-#	except:
-#		print("unable to connect")
-#		sys.exit()
+	except:
+		print("unable to connect")
+		sys.exit()
         while 1:
 		if(value == 0):
 			msg, CVframe, maskFrame = vision(cap)
-#			try:
-#				soc.send(msg)
-#			except:
-#	   			print 'Lost Connection with Roborio'
-#				soc.connect((host, port))
-#				print('found target')
-#				soc.send("#Found you\n")
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		elif(value == 1):
 			ret, CVframe = cap_two.read()
@@ -170,12 +170,23 @@ def gen(value):
 			#	frame = polarBearError
 			#else:
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
-		else:
+		elif(value ==2):
 			ret, CVframe = cap_three.read()
 			#if(ret == False):
 			#	frame = polarBearError
 			#else:
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
+		else:
+			msg, CVframe, maskFrame = vision(cap)
+			try:
+				soc.send(msg)
+			except:
+	   			print 'Lost Connection with Roborio'
+				soc.connect((host, port))
+				print('found target')
+				soc.send("#Found you\n")
+			frame = cv2.imencode('.jpg',maskFrame,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
+	
 		yield (b'--frame\r\n'
 	       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 		if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -206,7 +217,7 @@ def video_feed_three():
 @app.route('/video_feed_mask')
 def video_feed_mask():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(2),
+    return Response(gen(3),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/load_settings')
