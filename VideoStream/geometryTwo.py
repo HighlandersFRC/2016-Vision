@@ -33,6 +33,7 @@ cap_three.set(3,640)
 cap_three.set(4,480)
 
 #cap.set(CV_CAP_PROP_EXPOSURE_AUTO,1)
+font = cv2.FONT_HERSHEY_SIMPLEX
 
 
 #cap.set(15,100)
@@ -101,10 +102,36 @@ def vision(cap):
 		#Make sure that a contour region is found
 		if len(contours) > 1:
 			#find Biggest Contour region
-			areas = [cv2.contourArea(c) for c in contours]
-			max_index = np.argmax(areas)
-			cnt=contours[max_index]
-		
+			cnt = None
+			for cont in contours:
+				approx = cv2.approxPolyDP(cont,0.022*cv2.arcLength(cont,True),True)
+				rect = cv2.minAreaRect(cont)
+				box = cv2.cv.BoxPoints(rect)
+				box = np.int0(box)
+			
+				#find center of target for RoboRIO
+				xCenter = (box[0][0] + box[1][0] + box[2][0] + box[3][0]) / 4
+				yCenter = (box[0][1] + box[1][1] + box[2][1] + box[3][1]) / 4	
+
+
+				if len(approx)>8:
+					cv2.drawContours(frame,[cont],0,(255,0,0),-1)
+				elif len(approx)<8:
+					cv2.drawContours(frame,[cont],0,(0,0,255),-1)
+				else:
+					if cnt ==None:
+						cnt = cont
+					elif cv2.arcLength(cont,True) > cv2.arcLength(cnt,True):
+						cnt = cont				
+					cv2.drawContours(frame,[cont],0,(255,255,255),-1)
+				if(cv2.contourArea(cont)> 100):
+					cv2.putText(frame,str(len(approx)),(xCenter,yCenter),font,2,(255,255,255),2)
+	
+			if cnt == None:
+				areas = [cv2.contourArea(c) for c in contours]
+				max_index = np.argmax(areas)
+				cnt=contours[max_index]
+
 			#Find the smallest bounding box of the rectangle
 			rect = cv2.minAreaRect(cnt)
 			box = cv2.cv.BoxPoints(rect)

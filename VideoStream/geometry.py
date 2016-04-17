@@ -33,6 +33,9 @@ cap_three.set(3,640)
 cap_three.set(4,480)
 
 #cap.set(CV_CAP_PROP_EXPOSURE_AUTO,1)
+font = cv2.FONT_HERSHEY_SIMPLEX
+xCords = []
+yCords = []
 
 
 #cap.set(15,100)
@@ -101,10 +104,32 @@ def vision(cap):
 		#Make sure that a contour region is found
 		if len(contours) > 1:
 			#find Biggest Contour region
-			areas = [cv2.contourArea(c) for c in contours]
-			max_index = np.argmax(areas)
-			cnt=contours[max_index]
-		
+			cnt = None
+			for cont in contours:
+				approx = cv2.approxPolyDP(cont,0.01*cv2.arcLength(cont,True),True)
+				if (cv2.contourArea(cont)<100):
+					continue
+				if abs(8 - len(approx)) >=2:
+					continue
+				x, y, w, h= cv2.boundingRect(cont)
+				area = w * h
+				lightArea = cv2.contourArea(cont)
+				darkArea = area - lightArea
+				if (darkArea - (2*lightArea) < 0):
+					continue
+
+				if cnt ==None:
+					cnt = cont
+				elif cv2.contourArea(cont) > cv2.contourArea(cnt):
+						cnt = cont				
+	#			if(cv2.contourArea(cont)> 100):
+	#				cv2.putText(frame,str(len(approx)),(xCenter,yCenter),font,2,(255,255,255),2)
+	
+			if cnt == None:
+				areas = [cv2.contourArea(c) for c in contours]
+				max_index = np.argmax(areas)
+				cnt=contours[max_index]
+				#print("no candidates")
 			#Find the smallest bounding box of the rectangle
 			rect = cv2.minAreaRect(cnt)
 			box = cv2.cv.BoxPoints(rect)
@@ -113,7 +138,19 @@ def vision(cap):
 			#find center of target for RoboRIO
 			xCenter = (box[0][0] + box[1][0] + box[2][0] + box[3][0]) / 4
 			yCenter = (box[0][1] + box[1][1] + box[2][1] + box[3][1]) / 4
-			
+#			xAvg = 0
+#			yAvg = 0
+#			xCords.append(xCenter)
+#			yCords.append(yCenter)
+#			if(len(xCords)>20):
+#				xCords.pop(0)
+#			if(len(yCords) > 20):
+#				yCords.pop(0)
+#			for value in range(0,len(xCords)):
+#				xAvg = xAvg + xCords[value]
+#				yAvg = yAvg + yCords[value]
+#			xAvg = xAvg / len(xCords)
+#			yAvg = yAvg / len(yCords)
 			#These Calculations and draw settings are to help the driver lock onto the target
 			xLocked = abs(xTarget - xCenter) < xError
 			yLocked = abs(yTarget - yCenter) < yError
@@ -133,7 +170,7 @@ def vision(cap):
 				cv2.drawContours(frame,[box],0,(0,255,0),2)
 			msg = '(' + str(xCenter) + ',' + str(yCenter) + ')\n'
 		else:
-			msg = '( 0,0)\n'
+			msg = '(0,0)\n'
 	
 		#show final image (Testing only)		
 		#cv2.imshow("Show",frame)
@@ -155,22 +192,26 @@ def gen(value):
 		soc.connect((host, port))
 		print 'found target'
 		soc.send('#Found you\n')
-	
+		dataSend = True
 	except:
 		print("unable to connect")
+		dataSend = False
         while 1:
 		if(dataSend == False):
 			try:
 				soc.connect((host,port))
 				print('found target')
 				soc.send('#Recovered Transmission\n')
+				
 				dataSend = True
 			except:
 				print("unable to connect")
+				dataSend = False
 		if(value == 0):
 			msg, CVframe, maskFrame = vision(cap)
 			try:
 				soc.send(msg)
+				print(msg)
 			except:
 	   			print 'data send failed'
 				dataSend = False
@@ -189,13 +230,11 @@ def gen(value):
 			frame = cv2.imencode('.jpg',CVframe,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 		else:
 			msg, CVframe, maskFrame = vision(cap)
-#			try:
-#				soc.send(msg)
-#			except:
-#	   			print 'Lost Connection with Roborio'
-#				soc.connect((host, port))
-#				print('found target')
-#				soc.send("#Found you\n")
+			try:
+				soc.send(msg)
+			except:
+	   			print 'data send failed'
+				dataSend = False
 			frame = cv2.imencode('.jpg',maskFrame,[IMWRITE_JPEG_QUALITY, 10])[1].tostring()
 	
 		yield (b'--frame\r\n'

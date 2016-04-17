@@ -15,7 +15,7 @@ from flask import request
 xError = 24
 yError = 24
 xTarget = 320
-yTarget = 220 
+yTarget = 200 
 
 
 port = 5801
@@ -90,7 +90,7 @@ def vision(cap):
 
 	#Find the contours of the masked image
 	ret,thresh = cv2.threshold(mask,200,255,0)
-	discardImage, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 
 	#Make sure that a contour region is found
@@ -102,7 +102,7 @@ def vision(cap):
 	
 		#Find the smallest bounding box of the rectangle
 		rect = cv2.minAreaRect(cnt)
-		box = cv2.boxPoints(rect)
+		box = cv2.cv.BoxPoints(rect)
 		box = np.int0(box)
 		
 		#find center of target for RoboRIO
@@ -119,9 +119,9 @@ def vision(cap):
 		else:
 			cv2.line(frame,(320,0),(320,480),(255,0,0),3)
 		if(yLocked):
-			cv2.line(frame,(0,yCenter),(640,yCenter),(0,0,255),3)
+			cv2.line(frame,(0,yTarget),(640,yTarget),(0,0,255),3)
 		else:				
-			cv2.line(frame,(0,yCenter),(640,yCenter),(255,0,0),3)
+			cv2.line(frame,(0,yTarget),(640,yTarget),(255,0,0),3)
 		if(xLocked and yLocked):
 			cv2.drawContours(frame,[box],0,(0,0,255),2)
 		else:

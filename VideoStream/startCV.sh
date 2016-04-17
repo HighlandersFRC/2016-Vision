@@ -5,4 +5,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda-6.5/lib:/usr/local/lib:/usr/lib:/lib:
 cd /home/ubuntu/2016-Vision/VideoStream
 
 
-nohup python webCameraTest.py
+nohup python geometry.py

@@ -1,1 +1,1 @@
-{"name": "Shop", "h_min":70,"h_max":94,"s_min":90,"s_max":255,"v_min":88,"v_max":255}
+{"name": "Shop", "h_min":34,"h_max":88,"s_min":10,"s_max":137,"v_min":148,"v_max":255}

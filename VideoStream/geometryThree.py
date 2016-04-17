@@ -33,6 +33,7 @@ cap_three.set(3,640)
 cap_three.set(4,480)
 
 #cap.set(CV_CAP_PROP_EXPOSURE_AUTO,1)
+font = cv2.FONT_HERSHEY_SIMPLEX
 
 
 #cap.set(15,100)
@@ -97,14 +98,45 @@ def vision(cap):
 		ret,thresh = cv2.threshold(mask,200,255,0)
 		contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 	
-	
+			
 		#Make sure that a contour region is found
 		if len(contours) > 1:
 			#find Biggest Contour region
-			areas = [cv2.contourArea(c) for c in contours]
-			max_index = np.argmax(areas)
-			cnt=contours[max_index]
-		
+			cnt = None
+			possibleCnt = []
+			#loop through all accepted contours find potential target candidates
+			#do not consider contours that dont meet all requirements
+			for cont in contours:
+				approx = cv2.approxPolyDP(cont,0.01*cv2.arcLength(cont,True),True)
+				if not (abs(len(approx) - 8) <=1):
+					continue
+				if cv2.contourArea(cont)< 100:
+					continue
+			#Put the objects into the possibleCnt Array in a sorted manner
+				if len(possibleCnt) == 0 or cv2.contourArea(cont) < cv2.contourArea(possibleCnt[len(possibleCnt)-1]):
+					possibleCnt.append(cont)
+					continue
+				for i in range(0,len(possibleCnt)):
+					if cv2.contourArea(cont)> cv2.contourArea(possibleCnt[i]):
+						possibleCnt.insert(i,cont)
+
+						
+			#loop through all candidates pick the best one
+			if len(possibleCnt) > 0:
+				cnt = possibleCnt[0]
+			for cont in possibleCnt:
+				#cv2.drawContours(frame,[cont],0,(0,255,0),-1)	
+				if cv2.contourArea(cont) < cv2.contourArea(cnt):
+					if cv2.arcLength(cont,True) > cv2.arcLength(cnt,True):
+						cnt = cont				
+			cv2.drawContours(frame,[cnt],0,(0,0,0),-1)
+
+	
+			if cnt == None:
+				areas = [cv2.contourArea(c) for c in contours]
+				max_index = np.argmax(areas)
+				cnt=contours[max_index]
+
 			#Find the smallest bounding box of the rectangle
 			rect = cv2.minAreaRect(cnt)
 			box = cv2.cv.BoxPoints(rect)
